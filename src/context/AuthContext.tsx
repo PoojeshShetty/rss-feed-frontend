@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged,  } from 'firebase/auth';
+import { app } from '../firebase'; // Ensure you have a firebase.js file exporting your firebase app
 import { AuthContextType, User } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -8,46 +10,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useLocalStorage<User | null>('rss_reader_user', null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (email && password) {
-      const newUser: User = {
-        id: '1',
-        email,
-        displayName: email.split('@')[0]
-      };
-      setUser(newUser);
-      setIsLoading(false);
-      return true;
-    }
-    
-    setIsLoading(false);
-    return false;
-  };
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user: User) => {
+      if (user) {
+        const newUser: User = {
+          id: user.uid,
+          email: user.email || '',
+          displayName: user.displayName || email.split('@')[0]
+        };
+        setUser(newUser);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const signup = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (email && password) {
+    const auth = getAuth(app);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser: User = {
-        id: '1',
-        email,
-        displayName: email.split('@')[0]
+        id: userCredential.user.uid,
+        email: userCredential.user.email || '',
+        displayName: userCredential.user.displayName || email.split('@')[0]
       };
       setUser(newUser);
       setIsLoading(false);
       return true;
+    } catch (error: Error) {
+      setIsLoading(false);
+      return false;
     }
+  };
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
     
-    setIsLoading(false);
-    return false;
+    const auth = getAuth(app);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      const newUser: User = {
+        id: auth.currentUser?.uid || '',
+        email: auth.currentUser?.email || '',
+        displayName: auth.currentUser?.displayName || email.split('@')[0]
+      };
+      setUser(newUser);
+      setIsLoading(false);
+      return true;
+    } catch (error: Error) {
+      setIsLoading(false);
+      return false;
+    }
   };
 
   const logout = () => {

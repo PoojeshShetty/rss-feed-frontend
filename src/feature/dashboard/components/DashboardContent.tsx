@@ -33,7 +33,7 @@ export function DashboardContent({
         </div>
       ) : filteredPosts.length === 0 ? (
         <div className="text-center py-12">
-          {user && subscribedFeeds.length === 0 ? (
+          {user ? (
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Subscriptions Yet

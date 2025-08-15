@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Check } from 'lucide-react';
-import { RSSFeed } from '../../types';
+import { RSSFeed } from '../../../types';
 
 interface FeedCardProps {
   feed: RSSFeed;

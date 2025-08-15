@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useApp } from '../context/AppContext';
-import { FeedCard } from '../feature/feed/components/FeedCard';
-import { MessageBanner } from '../components/ui/MessageBanner';
-import { categories } from '../utils/mockData';
+import React, { useState, useMemo } from "react";
+import { Search, Filter } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useApp } from "../context/AppContext";
+import { FeedCard } from "../feature/feed/components/FeedCard";
+import { MessageBanner } from "../components/ui/MessageBanner";
+import { categories } from "../utils/mockData";
+import useFetchAndStoreFeeds from "../hooks/useFetchAndStoreFeeds";
+import useFeedStore from "../store/feedStore";
 
 interface ExploreProps {
   onNavigate: (page: string) => void;
@@ -12,23 +14,28 @@ interface ExploreProps {
 
 export function Explore({ onNavigate }: ExploreProps) {
   const { user } = useAuth();
-  const { feeds, subscribedFeeds, subscribe, unsubscribe } = useApp();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const { subscribedFeeds, subscribe, unsubscribe } = useApp();
+  const { feeds } = useFeedStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [message, setMessage] = useState<{
+    type: "success" | "error" | "info";
+    text: string;
+  } | null>(null);
+
+  useFetchAndStoreFeeds();
 
   const filteredFeeds = useMemo(() => {
-    return feeds.filter(feed => {
+    return feeds.filter((feed) => {
       // Filter by category
-      if (selectedCategory !== 'All' && feed.category !== selectedCategory) return false;
+      // if (selectedCategory !== 'All' && feed.category !== selectedCategory) return false;
 
       // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
           feed.title.toLowerCase().includes(query) ||
-          feed.description.toLowerCase().includes(query) ||
-          feed.category.toLowerCase().includes(query)
+          feed.description.toLowerCase().includes(query)
         );
       }
 
@@ -38,16 +45,22 @@ export function Explore({ onNavigate }: ExploreProps) {
 
   const handleSubscribe = (feedId: string) => {
     if (!user) {
-      setMessage({ type: 'info', text: 'Please log in to subscribe to feeds.' });
+      setMessage({
+        type: "info",
+        text: "Please log in to subscribe to feeds.",
+      });
       return;
     }
     subscribe(feedId);
-    setMessage({ type: 'success', text: 'Successfully subscribed to feed!' });
+    setMessage({ type: "success", text: "Successfully subscribed to feed!" });
   };
 
   const handleUnsubscribe = (feedId: string) => {
     unsubscribe(feedId);
-    setMessage({ type: 'success', text: 'Successfully unsubscribed from feed.' });
+    setMessage({
+      type: "success",
+      text: "Successfully unsubscribed from feed.",
+    });
   };
 
   return (
@@ -60,11 +73,13 @@ export function Explore({ onNavigate }: ExploreProps) {
           fixed={true}
         />
       )}
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Explore Feeds</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Explore Feeds
+          </h1>
           <p className="text-gray-600">
             Discover interesting RSS feeds across various categories
           </p>
@@ -93,7 +108,7 @@ export function Explore({ onNavigate }: ExploreProps) {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
@@ -105,14 +120,14 @@ export function Explore({ onNavigate }: ExploreProps) {
 
         {/* Category Pills (Mobile-friendly alternative) */}
         <div className="flex flex-wrap gap-2 mb-8 lg:hidden">
-          {categories.map(category => (
+          {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
               }`}
             >
               {category}
@@ -132,13 +147,14 @@ export function Explore({ onNavigate }: ExploreProps) {
           <>
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                Showing {filteredFeeds.length} feed{filteredFeeds.length !== 1 ? 's' : ''}
-                {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+                Showing {filteredFeeds.length} feed
+                {filteredFeeds.length !== 1 ? "s" : ""}
+                {selectedCategory !== "All" && ` in ${selectedCategory}`}
               </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredFeeds.map(feed => (
+              {feeds.map((feed) => (
                 <FeedCard
                   key={feed.id}
                   feed={feed}
@@ -158,10 +174,11 @@ export function Explore({ onNavigate }: ExploreProps) {
               Get the Most Out of RSS Reader
             </h3>
             <p className="text-blue-700 mb-4">
-              Sign up to subscribe to feeds, bookmark favorites, and create your personalized dashboard.
+              Sign up to subscribe to feeds, bookmark favorites, and create your
+              personalized dashboard.
             </p>
             <button
-              onClick={() => onNavigate('login')}
+              onClick={() => onNavigate("login")}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
             >
               Sign Up Now

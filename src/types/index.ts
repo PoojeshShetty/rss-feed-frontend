@@ -22,11 +22,14 @@ export interface BlogPost {
   summary: string;
   contentHtml: string;
   author?: string;
-  publishedAt: string;
+  published_at: string;
   sourceFeedId: string;
   sourceFeedName: string;
-  originalUrl: string;
+  link: string;
   imageUrl?: string;
+  feed: {
+    title: string;
+  };
 }
 
 export interface AuthContextType {

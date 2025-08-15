@@ -1,6 +1,13 @@
-import React from 'react';
-import { Calendar, User, ExternalLink, Share2, Bookmark, BookmarkCheck } from 'lucide-react';
-import { BlogPost } from '../../types';
+import React from "react";
+import {
+  Calendar,
+  User,
+  ExternalLink,
+  Share2,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
+import { BlogPost } from "../../types";
 
 interface BlogPostCardProps {
   post: BlogPost;
@@ -12,20 +19,20 @@ interface BlogPostCardProps {
   showBookmarkButton?: boolean;
 }
 
-export function BlogPostCard({ 
-  post, 
-  onViewPost, 
-  onShare, 
+export function BlogPostCard({
+  post,
+  onViewPost,
+  onShare,
   onBookmark,
   onUnbookmark,
   isBookmarked = false,
-  showBookmarkButton = true
+  showBookmarkButton = true,
 }: BlogPostCardProps) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -48,11 +55,11 @@ export function BlogPostCard({
           />
         </div>
       )}
-      
+
       <div className="p-6">
         <div className="flex items-center justify-between mb-3">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            {post.sourceFeedName}
+            {post.feed.title}
           </span>
           <div className="flex items-center space-x-2">
             {showBookmarkButton && (
@@ -60,10 +67,10 @@ export function BlogPostCard({
                 onClick={handleBookmarkClick}
                 className={`p-1.5 transition-colors ${
                   isBookmarked
-                    ? 'text-yellow-600 hover:text-yellow-700'
-                    : 'text-gray-400 hover:text-yellow-600'
+                    ? "text-yellow-600 hover:text-yellow-700"
+                    : "text-gray-400 hover:text-yellow-600"
                 }`}
-                title={isBookmarked ? 'Remove bookmark' : 'Bookmark this post'}
+                title={isBookmarked ? "Remove bookmark" : "Bookmark this post"}
               >
                 {isBookmarked ? (
                   <BookmarkCheck className="w-4 h-4" />
@@ -105,12 +112,12 @@ export function BlogPostCard({
             )}
             <div className="flex items-center space-x-1">
               <Calendar className="w-4 h-4" />
-              <span>{formatDate(post.publishedAt)}</span>
+              <span>{formatDate(post.published_at)}</span>
             </div>
           </div>
-          
+
           <a
-            href={post.originalUrl}
+            href={post.link}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 transition-colors"

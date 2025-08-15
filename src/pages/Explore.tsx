@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { FeedCard } from '../components/feed/FeedCard';
+import { FeedCard } from '../feature/feed/components/FeedCard';
 import { MessageBanner } from '../components/ui/MessageBanner';
 import { categories } from '../utils/mockData';
 

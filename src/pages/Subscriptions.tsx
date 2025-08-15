@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Trash2, Rss } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { FeedCard } from '../components/feed/FeedCard';
+import { FeedCard } from '../feature/feed/components/FeedCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { MessageBanner } from '../components/ui/MessageBanner';
 

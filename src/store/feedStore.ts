@@ -24,11 +24,15 @@ interface Feed {
 interface FeedStore {
   feeds: Feed[];
   setFeeds: (feeds: Feed[]) => void;
+  subscribedFeeds: Feed[];
+  setSubscribedFeeds: (subscribedFeeds: Feed[]) => void;
 }
 
 const useFeedStore = create<FeedStore>((set) => ({
   feeds: [],
   setFeeds: (feeds) => set({ feeds }),
+  subscribedFeeds: [],
+  setSubscribedFeeds: (subscribedFeeds) => set({ subscribedFeeds }),
 }));
 
 export default useFeedStore;

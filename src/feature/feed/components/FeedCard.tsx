@@ -36,21 +36,16 @@ export function FeedCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 text-sm text-gray-500">
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-1 text-sm text-gray-500 flex-wrap capitalize">
           {feed.categories.map((item) => (
             <span
               key={item.id}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800 font-medium"
+              className="inline-flex px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-800 font-medium mb-1"
             >
               {item.name}
             </span>
           ))}
-          {isSubscribed && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">
-              Subscribed
-            </span>
-          )}
         </div>
 
         {showSubscribeButton && (

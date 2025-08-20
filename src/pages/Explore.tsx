@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { useApp } from "../context/AppContext";
 import { FeedCard } from "../feature/feed/components/FeedCard";
 import { MessageBanner } from "../components/ui/MessageBanner";
 import { categories } from "../utils/mockData";
 import useFetchAndStoreFeeds from "../hooks/useFetchAndStoreFeeds";
 import useFeedStore from "../store/feedStore";
+import useFetchAndStoreSubscriptions from "../hooks/useFetchAndStoreSubscriptions";
+import useSubscriptionStore from "../store/subscriptionStore";
 
 interface ExploreProps {
   onNavigate: (page: string) => void;
@@ -14,7 +15,6 @@ interface ExploreProps {
 
 export function Explore({ onNavigate }: ExploreProps) {
   const { user } = useAuth();
-  const { subscribedFeeds, subscribe, unsubscribe } = useApp();
   const { feeds } = useFeedStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -23,7 +23,14 @@ export function Explore({ onNavigate }: ExploreProps) {
     text: string;
   } | null>(null);
 
-  useFetchAndStoreFeeds();
+  const { queryResult, subscribedQueryResult } = useFetchAndStoreFeeds();
+  const { subscribeMutation, unsubscribeMutation } =
+    useFetchAndStoreSubscriptions();
+  const subscibedFeeds = useSubscriptionStore();
+
+  useEffect(() => {
+    queryResult.refetch();
+  }, []);
 
   const filteredFeeds = useMemo(() => {
     return feeds.filter((feed) => {
@@ -31,13 +38,13 @@ export function Explore({ onNavigate }: ExploreProps) {
       // if (selectedCategory !== 'All' && feed.category !== selectedCategory) return false;
 
       // Filter by search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          feed.title.toLowerCase().includes(query) ||
-          feed.description.toLowerCase().includes(query)
-        );
-      }
+      // if (searchQuery) {
+      //   const query = searchQuery.toLowerCase();
+      //   return (
+      //     feed.title.toLowerCase().includes(query) ||
+      //     feed.description.toLowerCase().includes(query)
+      //   );
+      // }
 
       return true;
     });
@@ -51,16 +58,47 @@ export function Explore({ onNavigate }: ExploreProps) {
       });
       return;
     }
-    subscribe(feedId);
-    setMessage({ type: "success", text: "Successfully subscribed to feed!" });
+    subscribeMutation.mutate(
+      { feed_id: feedId },
+      {
+        onSuccess: () => {
+          setMessage({
+            type: "success",
+            text: "Successfully subscribed to feed!",
+          });
+        },
+        onError: () => {
+          setMessage({ type: "error", text: "Failed to subscribe to feed." });
+        },
+      }
+    );
   };
 
   const handleUnsubscribe = (feedId: string) => {
-    unsubscribe(feedId);
-    setMessage({
-      type: "success",
-      text: "Successfully unsubscribed from feed.",
-    });
+    if (!user) {
+      setMessage({
+        type: "info",
+        text: "Please log in to unsubscribe from feeds.",
+      });
+      return;
+    }
+    unsubscribeMutation.mutate(
+      { feed_id: feedId },
+      {
+        onSuccess: () => {
+          setMessage({
+            type: "success",
+            text: "Successfully unsubscribed from feed!",
+          });
+        },
+        onError: () => {
+          setMessage({
+            type: "error",
+            text: "Failed to unsubscribe from feed.",
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -158,7 +196,7 @@ export function Explore({ onNavigate }: ExploreProps) {
                 <FeedCard
                   key={feed.id}
                   feed={feed}
-                  isSubscribed={subscribedFeeds.includes(feed.id)}
+                  isSubscribed={!!subscibedFeeds.subscriptions[feed.id]}
                   onSubscribe={handleSubscribe}
                   onUnsubscribe={handleUnsubscribe}
                 />

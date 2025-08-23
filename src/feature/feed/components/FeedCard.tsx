@@ -17,7 +17,7 @@ export function FeedCard({
   showSubscribeButton = true,
 }: FeedCardProps) {
   return (
-    <div className="flex flex-col justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+    <div className="flex flex-col justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 h-full">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">

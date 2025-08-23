@@ -7,8 +7,16 @@ const getBlogPosts = async () => {
   return data;
 };
 
+const getBookmarkedBlogPosts = async () => {
+  const data = await get("blog_posts/bookmarked");
+  return data;
+};
+
 const useFetchAndStoreBlogPosts = () => {
   const setBlogPosts = useBlogPostStore((state) => state.setBlogPosts);
+  const setBookmarkedBlogPosts = useBlogPostStore(
+    (state) => state.setBookmarkedBlogPosts
+  );
 
   const queryResult = useQuery({
     queryKey: ["blogPosts"],
@@ -19,7 +27,16 @@ const useFetchAndStoreBlogPosts = () => {
     },
   });
 
-  return queryResult;
+  const bookmarkedQueryResult = useQuery({
+    queryKey: ["bookmarkedBlogPosts"],
+    queryFn: async () => {
+      const data = await getBookmarkedBlogPosts();
+      setBookmarkedBlogPosts(data); // Update Zustand after successful fetch
+      return data;
+    },
+  });
+
+  return { queryResult, bookmarkedQueryResult };
 };
 
 export default useFetchAndStoreBlogPosts;

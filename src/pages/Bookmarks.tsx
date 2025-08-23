@@ -5,6 +5,7 @@ import { useApp } from "../context/AppContext";
 import { MessageBanner } from "../components/ui/MessageBanner";
 import { useState } from "react";
 import { BookmarksContent } from "../feature/bookmarks/components/BookmarksContent";
+import useFetchAndStoreBlogPosts from "../hooks/useFetchAndStoreBlogPosts";
 
 interface BookmarksProps {
   onNavigate: (page: string, postId?: string) => void;
@@ -12,29 +13,19 @@ interface BookmarksProps {
 
 export function Bookmarks({ onNavigate }: BookmarksProps) {
   const { user } = useAuth();
-  const { feeds, blogPosts, bookmarkedPosts, unbookmarkPost } = useApp();
+  const { bookmarkedPosts, unbookmarkPost } = useApp();
+  const { bookmarkedQueryResult } = useFetchAndStoreBlogPosts();
   const [message, setMessage] = useState<{
     type: "success" | "error" | "info";
     text: string;
   } | null>(null);
   const [expandedFeeds, setExpandedFeeds] = useState<Set<string>>(new Set());
 
+  const blogPosts = bookmarkedQueryResult.data || [];
+
   const bookmarkedPostObjects = blogPosts.filter((post) =>
     bookmarkedPosts.includes(post.id)
   );
-
-  // Group bookmarked posts by feed
-  const groupedBookmarks = bookmarkedPostObjects.reduce((acc, post) => {
-    const feedId = post.sourceFeedId;
-    if (!acc[feedId]) {
-      acc[feedId] = {
-        feed: feeds.find((f) => f.id === feedId),
-        posts: [],
-      };
-    }
-    acc[feedId].posts.push(post);
-    return acc;
-  }, {} as Record<string, { feed: unknown; posts: unknown[] }>);
 
   const handleUnbookmark = (postId: string) => {
     const post = blogPosts.find((p) => p.id === postId);
@@ -101,14 +92,12 @@ export function Bookmarks({ onNavigate }: BookmarksProps) {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             My Bookmarks
           </h1>
-          <p className="text-gray-600">
-            Posts you've saved for later reading, organized by feed
-          </p>
+          <p className="text-gray-600">Posts you've saved for later reading.</p>
         </div>
 
         {/* Bookmarked Posts */}
         <BookmarksContent
-          groupedBookmarks={groupedBookmarks}
+          blogPosts={blogPosts}
           expandedFeeds={expandedFeeds}
           toggleFeedExpansion={toggleFeedExpansion}
           handleUnbookmark={handleUnbookmark}

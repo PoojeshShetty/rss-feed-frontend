@@ -29,11 +29,15 @@ interface BlogPost {
 interface BlogPostStore {
   blogPosts: BlogPost[];
   setBlogPosts: (blogPosts: BlogPost[]) => void;
+  bookmarkedBlogPosts: BlogPost[];
+  setBookmarkedBlogPosts: (bookmarkedBlogPosts: BlogPost[]) => void;
 }
 
 const useBlogPostStore = create<BlogPostStore>((set) => ({
   blogPosts: [],
   setBlogPosts: (blogPosts) => set({ blogPosts }),
+  bookmarkedBlogPosts: [],
+  setBookmarkedBlogPosts: (bookmarkedBlogPosts) => set({ bookmarkedBlogPosts }),
 }));
 
 export default useBlogPostStore;

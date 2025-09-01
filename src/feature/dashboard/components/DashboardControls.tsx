@@ -10,7 +10,8 @@ interface DashboardControlsProps {
   isLoading: boolean;
   isFetchingBlogPosts: boolean;
   user: any;
-  subscribedFeedObjects: any[];
+  subscribedFeedObjects: Record<string, unknown>;
+  feeds: any[];
 }
 
 export function DashboardControls({
@@ -23,6 +24,7 @@ export function DashboardControls({
   isFetchingBlogPosts,
   user,
   subscribedFeedObjects,
+  feeds,
 }: DashboardControlsProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
@@ -40,7 +42,7 @@ export function DashboardControls({
         </div>
 
         {/* Feed Filter */}
-        {user && subscribedFeedObjects.length > 0 && (
+        {user && feeds?.length > 0 && (
           <div className="flex items-center space-x-2">
             <Filter className="text-gray-400 w-5 h-5" />
             <select
@@ -49,11 +51,11 @@ export function DashboardControls({
               className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Feeds</option>
-              {subscribedFeedObjects.map((feed) => (
+              {/* {feeds.map((feed) => (
                 <option key={feed.id} value={feed.id}>
                   {feed.title}
                 </option>
-              ))}
+              ))} */}
             </select>
           </div>
         )}

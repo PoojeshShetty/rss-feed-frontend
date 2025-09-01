@@ -7,6 +7,8 @@ import useBlogPostStore from "../store/blogPostStore";
 import { DashboardContent } from "../feature/dashboard/components/DashboardContent";
 import { DashboardControls } from "../feature/dashboard/components/DashboardControls";
 import { DashboardWelcome } from "../feature/dashboard/components/DashboardWelcome";
+import useFetchAndStoreSubscriptions from "../hooks/useFetchAndStoreSubscriptions";
+import useSubscriptionStore from "../store/subscriptionStore";
 
 interface DashboardProps {
   onNavigate: (page: string, postId?: string) => void;
@@ -16,7 +18,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const { user } = useAuth();
   const {
     feeds,
-    subscribedFeeds,
     bookmarkedPosts,
     refreshFeeds,
     isLoading,
@@ -24,25 +25,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     unbookmarkPost,
   } = useApp();
   const { blogPosts } = useBlogPostStore();
+  const { subscriptions } = useSubscriptionStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFeed, setSelectedFeed] = useState("all");
   const [message, setMessage] = useState<{
     type: "success" | "error" | "info";
     text: string;
   } | null>(null);
+  const subscribeMutation = useFetchAndStoreSubscriptions();
 
   const { isLoading: isFetchingBlogPosts, isError } =
     useFetchAndStoreBlogPosts();
 
-  const subscribedFeedObjects = feeds.filter((feed) =>
-    subscribedFeeds.includes(feed.id)
-  );
   const filteredPosts = useMemo(() => {
     return blogPosts.filter((post) => {
       // Filter by subscription
-      const isFromSubscribedFeed = subscribedFeeds.includes(post.feed_id);
       if (!user) return true; // Show all posts if not logged in
-      if (!isFromSubscribedFeed) return false;
 
       // Filter by selected feed
       if (selectedFeed !== "all" && post.feed_id !== selectedFeed) return false;
@@ -59,7 +57,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       return true;
     });
-  }, [blogPosts, subscribedFeeds, selectedFeed, searchQuery, user]);
+  }, [blogPosts, selectedFeed, searchQuery, user]);
 
   const handleRefresh = async () => {
     try {
@@ -94,6 +92,31 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     setMessage({ type: "success", text: "Bookmark removed." });
   };
 
+  const handleSubscribe = (feedId: string) => {
+    if (!user) {
+      setMessage({
+        type: "info",
+        text: "Please log in to subscribe to feeds.",
+      });
+      return;
+    }
+
+    subscribeMutation.mutate(
+      { user_id: "dummy_user_id", feed_id: feedId },
+      {
+        onSuccess: () => {
+          setMessage({
+            type: "success",
+            text: "Successfully subscribed to feed!",
+          });
+        },
+        onError: () => {
+          setMessage({ type: "error", text: "Failed to subscribe to feed." });
+        },
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {message && (
@@ -116,7 +139,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           isLoading={isLoading}
           isFetchingBlogPosts={isFetchingBlogPosts}
           user={user}
-          subscribedFeedObjects={subscribedFeedObjects}
+          subscribedFeedObjects={subscriptions}
         />
         <DashboardContent
           filteredPosts={filteredPosts}

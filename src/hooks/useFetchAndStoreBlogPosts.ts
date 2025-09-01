@@ -3,7 +3,7 @@ import useBlogPostStore from "../store/blogPostStore";
 import { get } from "../utils/api";
 
 const getBlogPosts = async () => {
-  const data = await get("blog_posts/");
+  const data = await get("blog_posts/subscribed");
   return data;
 };
 

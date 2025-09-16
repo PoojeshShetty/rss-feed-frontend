@@ -1,9 +1,20 @@
 import axios from "axios";
 
+let authToken = "";
+
+export const setAuthToken = (token: string) => {
+  authToken = token;
+};
+
+export const getAuthToken = () => {
+  return authToken;
+};
+
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${authToken}`,
   },
 });
 

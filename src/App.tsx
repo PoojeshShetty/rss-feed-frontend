@@ -7,8 +7,9 @@ import { Explore } from "./pages/Explore";
 import { Subscriptions } from "./pages/Subscriptions";
 import { Bookmarks } from "./pages/Bookmarks";
 import { BlogPost } from "./pages/BlogPost";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AppProvider } from "./context/AppContext";
+import { setAuthToken } from "./utils/api";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <AppProvider>
+          <TokenValidator />
           <div className="min-h-screen bg-gray-50">
             {currentPage !== "login" && (
               <Header currentPage={currentPage} onNavigate={navigate} />
@@ -91,6 +93,49 @@ function App() {
       </QueryClientProvider>
     </AuthProvider>
   );
+}
+
+function TokenValidator() {
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const checkTokenValidity = () => {
+      if (user) {
+        try {
+          // Check if the token is valid
+          // This is a placeholder - replace with actual token validation logic
+          const isTokenValid = validateFirebaseToken(user.token);
+
+          if (!isTokenValid) {
+            logout();
+            setAuthToken("");
+          }
+        } catch (error) {
+          console.error("Error validating token:", error);
+          logout();
+        }
+      }
+    };
+
+    checkTokenValidity();
+  }, [user, logout]);
+
+  return null;
+}
+
+function validateFirebaseToken(token: string): boolean {
+  try {
+    // Decode the token to get the expiration date
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const exp = payload.exp * 1000; // Convert to milliseconds
+    const now = Date.now();
+
+    // Check if the token is expired
+    return exp > now;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return false;
+  }
 }
 
 export default App;
